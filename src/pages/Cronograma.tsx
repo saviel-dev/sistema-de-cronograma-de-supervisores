@@ -3,12 +3,14 @@
  * 
  * Página que muestra el cronograma semanal de supervisores.
  * Presenta una vista de calendario con los turnos asignados.
+ * Incluye animaciones de entrada y conteo animado en las cifras.
  */
 
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import ContadorAnimado from "@/components/ui/ContadorAnimado";
 
 // Días de la semana para el encabezado del calendario
 const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -47,9 +49,12 @@ const Cronograma = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Encabezado con controles de navegación */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div 
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in"
+        style={{ animationDelay: "0ms" }}
+      >
         <div>
           <h2 className="text-2xl font-bold text-foreground">
             Cronograma Semanal
@@ -92,7 +97,10 @@ const Cronograma = () => {
       </div>
 
       {/* Leyenda de tipos de turno */}
-      <div className="flex flex-wrap gap-4">
+      <div 
+        className="flex flex-wrap gap-4 animate-fade-in"
+        style={{ animationDelay: "100ms" }}
+      >
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-chart-1" />
           <span className="text-sm text-muted-foreground">Turno Mañana</span>
@@ -107,7 +115,7 @@ const Cronograma = () => {
         </div>
       </div>
 
-      {/* Calendario semanal */}
+      {/* Calendario semanal con animaciones escalonadas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
         {diasSemana.map((dia, indice) => {
           const turnosDelDia = obtenerTurnosPorDia(indice);
@@ -116,7 +124,8 @@ const Cronograma = () => {
           return (
             <Card
               key={dia}
-              className={`border-border shadow-sm ${esFinDeSemana ? "bg-accent/30" : ""}`}
+              className={`border-border shadow-sm animate-fade-in ${esFinDeSemana ? "bg-accent/30" : ""}`}
+              style={{ animationDelay: `${200 + indice * 80}ms` }}
             >
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-foreground">
@@ -128,7 +137,8 @@ const Cronograma = () => {
                   turnosDelDia.map((turno, idx) => (
                     <div
                       key={idx}
-                      className={`p-2 rounded-md border-l-4 ${coloresTurno[turno.tipo]} cursor-pointer hover:scale-[1.02] transition-transform`}
+                      className={`p-2 rounded-md border-l-4 ${coloresTurno[turno.tipo]} cursor-pointer hover:scale-[1.02] transition-transform animate-fade-in`}
+                      style={{ animationDelay: `${300 + indice * 80 + idx * 50}ms` }}
                     >
                       <p className="text-sm font-medium">{turno.supervisor}</p>
                       <p className="text-xs opacity-80">{turno.horario}</p>
@@ -145,27 +155,38 @@ const Cronograma = () => {
         })}
       </div>
 
-      {/* Resumen de la semana */}
-      <Card className="border-border shadow-sm">
+      {/* Resumen de la semana con contadores animados */}
+      <Card 
+        className="border-border shadow-sm animate-fade-in"
+        style={{ animationDelay: "800ms" }}
+      >
         <CardHeader>
           <CardTitle className="text-foreground">Resumen de la Semana</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center p-4 rounded-lg bg-accent/50">
-              <p className="text-2xl font-bold text-foreground">14</p>
+              <p className="text-2xl font-bold text-foreground">
+                <ContadorAnimado valor={14} duracion={1500} />
+              </p>
               <p className="text-sm text-muted-foreground">Turnos Totales</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-accent/50">
-              <p className="text-2xl font-bold text-foreground">6</p>
+              <p className="text-2xl font-bold text-foreground">
+                <ContadorAnimado valor={6} duracion={1200} />
+              </p>
               <p className="text-sm text-muted-foreground">Supervisores</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-accent/50">
-              <p className="text-2xl font-bold text-foreground">98%</p>
+              <p className="text-2xl font-bold text-foreground">
+                <ContadorAnimado valor={98} duracion={1800} esPorcentaje />
+              </p>
               <p className="text-sm text-muted-foreground">Cobertura</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-accent/50">
-              <p className="text-2xl font-bold text-foreground">0</p>
+              <p className="text-2xl font-bold text-foreground">
+                <ContadorAnimado valor={0} duracion={800} />
+              </p>
               <p className="text-sm text-muted-foreground">Conflictos</p>
             </div>
           </div>
