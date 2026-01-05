@@ -1,24 +1,61 @@
+/**
+ * App.tsx
+ * 
+ * Componente raíz de la aplicación.
+ * Configura los proveedores globales, el sistema de rutas
+ * y el layout principal con la barra lateral.
+ */
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+
+// Layout principal
+import LayoutPrincipal from "./components/layout/LayoutPrincipal";
+
+// Páginas de la aplicación
+import ResumenGeneral from "./pages/ResumenGeneral";
+import Cronograma from "./pages/Cronograma";
+import Supervisores from "./pages/Supervisores";
+import Configuracion from "./pages/Configuracion";
+import Ayuda from "./pages/Ayuda";
 import NotFound from "./pages/NotFound";
 
+// Cliente de React Query para manejo de estado del servidor
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      {/* Componentes de notificaciones toast */}
       <Toaster />
       <Sonner />
+      
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {/* Layout con sidebar que envuelve todas las rutas */}
+        <LayoutPrincipal>
+          <Routes>
+            {/* Página principal - Resumen general */}
+            <Route path="/" element={<ResumenGeneral />} />
+            
+            {/* Cronograma de supervisores */}
+            <Route path="/cronograma" element={<Cronograma />} />
+            
+            {/* Gestión de supervisores */}
+            <Route path="/supervisores" element={<Supervisores />} />
+            
+            {/* Configuración del sistema */}
+            <Route path="/configuracion" element={<Configuracion />} />
+            
+            {/* Centro de ayuda */}
+            <Route path="/ayuda" element={<Ayuda />} />
+            
+            {/* Ruta 404 para páginas no encontradas */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </LayoutPrincipal>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
