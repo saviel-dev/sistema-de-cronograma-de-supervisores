@@ -26,14 +26,14 @@ const Configuracion = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 animate-fade-in">
       {/* Encabezado de la página */}
       <div>
         <h2 className="text-2xl font-bold text-foreground">
-          Configuración del Sistema
+          Configuración
         </h2>
         <p className="text-muted-foreground mt-1">
-          Personaliza las preferencias y comportamiento de la aplicación.
+          Administra las preferencias generales del sistema.miento de la aplicación.
         </p>
       </div>
 

@@ -87,7 +87,7 @@ const Supervisores = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Encabezado con controles */}
-      <div 
+      <div
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in"
         style={{ animationDelay: "0ms" }}
       >
@@ -107,7 +107,7 @@ const Supervisores = () => {
       </div>
 
       {/* Barra de búsqueda y filtros */}
-      <div 
+      <div
         className="flex flex-col sm:flex-row gap-3 animate-fade-in"
         style={{ animationDelay: "100ms" }}
       >
@@ -136,7 +136,7 @@ const Supervisores = () => {
 
       {/* Estadísticas rápidas con contadores animados */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card 
+        <Card
           className="border-border shadow-sm animate-fade-in"
           style={{ animationDelay: "150ms" }}
         >
@@ -147,7 +147,7 @@ const Supervisores = () => {
             <p className="text-sm text-muted-foreground">Total Supervisores</p>
           </CardContent>
         </Card>
-        <Card 
+        <Card
           className="border-border shadow-sm animate-fade-in"
           style={{ animationDelay: "200ms" }}
         >
@@ -158,7 +158,7 @@ const Supervisores = () => {
             <p className="text-sm text-muted-foreground">Activos</p>
           </CardContent>
         </Card>
-        <Card 
+        <Card
           className="border-border shadow-sm animate-fade-in"
           style={{ animationDelay: "250ms" }}
         >
@@ -169,7 +169,7 @@ const Supervisores = () => {
             <p className="text-sm text-muted-foreground">En Vacaciones</p>
           </CardContent>
         </Card>
-        <Card 
+        <Card
           className="border-border shadow-sm animate-fade-in"
           style={{ animationDelay: "300ms" }}
         >
@@ -185,8 +185,8 @@ const Supervisores = () => {
       {/* Lista de supervisores en cards con animaciones escalonadas */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {supervisores.map((supervisor, index) => (
-          <Card 
-            key={supervisor.id} 
+          <Card
+            key={supervisor.id}
             className="border-border shadow-sm hover:shadow-md transition-shadow animate-fade-in"
             style={{ animationDelay: `${400 + index * 100}ms` }}
           >
@@ -206,7 +206,7 @@ const Supervisores = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Menú de acciones */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -7,16 +7,17 @@
  */
 
 import { NavLink } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Settings, 
-  HelpCircle, 
-  Users, 
-  ChevronLeft, 
-  ChevronRight 
+import {
+  LayoutDashboard,
+  Calendar,
+  Settings,
+  HelpCircle,
+  Users,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 // Definición de los elementos de navegación
 const elementosNavegacion = [
@@ -72,7 +73,7 @@ const BarraLateral = ({ estaColapsada, alternarColapso }: PropiedadesBarraLatera
             </span>
           </div>
         )}
-        
+
         {/* Botón para colapsar/expandir la sidebar */}
         <button
           onClick={alternarColapso}
@@ -114,6 +115,16 @@ const BarraLateral = ({ estaColapsada, alternarColapso }: PropiedadesBarraLatera
           </NavLink>
         ))}
       </nav>
+
+      {/* Footer de la barra lateral con toggle de tema */}
+      <div className="absolute bottom-4 left-0 w-full px-4">
+        <div className={cn("flex items-center", estaColapsada ? "justify-center" : "justify-between")}>
+          {!estaColapsada && (
+            <span className="text-xs text-muted-foreground font-medium">Tema</span>
+          )}
+          <ModeToggle />
+        </div>
+      </div>
     </aside>
   );
 };

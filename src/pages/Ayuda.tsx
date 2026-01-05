@@ -66,7 +66,7 @@ const recursos = [
 
 const Ayuda = () => {
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl animate-fade-in">
       {/* Encabezado */}
       <div>
         <h2 className="text-2xl font-bold text-foreground">

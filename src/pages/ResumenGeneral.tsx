@@ -6,11 +6,11 @@
  * Incluye animaciones de entrada y conteo en las cifras.
  */
 
-import { 
-  Users, 
-  Calendar, 
-  CheckCircle, 
-  Clock, 
+import {
+  Users,
+  Calendar,
+  CheckCircle,
+  Clock,
   TrendingUp,
   AlertTriangle
 } from "lucide-react";
@@ -24,16 +24,18 @@ const metricas = [
     valor: 24,
     cambio: "+2 esta semana",
     icono: Users,
-    colorIcono: "text-primary",
-    fondoIcono: "bg-primary/10",
+    colorIcono: "text-white",
+    fondoIcono: "bg-white/20",
+    bgColor: "bg-blue-600",
   },
   {
     titulo: "Turnos Programados",
     valor: 156,
     cambio: "Para esta semana",
     icono: Calendar,
-    colorIcono: "text-chart-2",
-    fondoIcono: "bg-chart-2/10",
+    colorIcono: "text-white",
+    fondoIcono: "bg-white/20",
+    bgColor: "bg-violet-600",
   },
   {
     titulo: "Tareas Completadas",
@@ -41,16 +43,18 @@ const metricas = [
     esPorcentaje: true,
     cambio: "+5% vs mes anterior",
     icono: CheckCircle,
-    colorIcono: "text-chart-1",
-    fondoIcono: "bg-chart-1/10",
+    colorIcono: "text-white",
+    fondoIcono: "bg-white/20",
+    bgColor: "bg-emerald-600",
   },
   {
     titulo: "Pendientes Urgentes",
     valor: 3,
     cambio: "Requieren atención",
     icono: AlertTriangle,
-    colorIcono: "text-destructive",
-    fondoIcono: "bg-destructive/10",
+    colorIcono: "text-white",
+    fondoIcono: "bg-white/20",
+    bgColor: "bg-rose-600",
   },
 ];
 
@@ -98,25 +102,25 @@ const ResumenGeneral = () => {
       {/* Grid de tarjetas de métricas con animaciones escalonadas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metricas.map((metrica, index) => (
-          <Card 
-            key={metrica.titulo} 
-            className="border-border shadow-sm hover:shadow-md transition-shadow animate-fade-in"
+          <Card
+            key={metrica.titulo}
+            className={`border-border shadow-sm hover:shadow-md transition-shadow animate-fade-in ${metrica.bgColor}`}
             style={{ animationDelay: `${(index + 1) * 100}ms` }}
           >
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-white/80">
                     {metrica.titulo}
                   </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    <ContadorAnimado 
-                      valor={metrica.valor} 
+                  <p className="text-2xl font-bold text-white">
+                    <ContadorAnimado
+                      valor={metrica.valor}
                       esPorcentaje={metrica.esPorcentaje || false}
                       duracion={1500 + index * 200}
                     />
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-white/70">
                     {metrica.cambio}
                   </p>
                 </div>
@@ -132,7 +136,7 @@ const ResumenGeneral = () => {
       {/* Sección de contenido adicional */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Gráfico de rendimiento */}
-        <Card 
+        <Card
           className="lg:col-span-2 border-border shadow-sm animate-fade-in"
           style={{ animationDelay: "500ms" }}
         >
@@ -151,7 +155,7 @@ const ResumenGeneral = () => {
                   <div key={dia} className="flex flex-col items-center gap-2 flex-1">
                     <div
                       className="w-full bg-primary/80 rounded-t-md hover:bg-primary transition-all duration-500"
-                      style={{ 
+                      style={{
                         height: `${alturas[index]}%`,
                         animation: `grow-bar 0.8s ease-out ${index * 100}ms forwards`,
                         transform: "scaleY(0)",
@@ -167,7 +171,7 @@ const ResumenGeneral = () => {
         </Card>
 
         {/* Lista de actividad reciente */}
-        <Card 
+        <Card
           className="border-border shadow-sm animate-fade-in"
           style={{ animationDelay: "600ms" }}
         >
