@@ -3,6 +3,7 @@
  * 
  * Página principal del dashboard que muestra un resumen
  * de las métricas y actividades más importantes del sistema.
+ * Incluye animaciones de entrada y conteo en las cifras.
  */
 
 import { 
@@ -14,12 +15,13 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ContadorAnimado from "@/components/ui/ContadorAnimado";
 
 // Datos de demostración para las tarjetas de métricas
 const metricas = [
   {
     titulo: "Supervisores Activos",
-    valor: "24",
+    valor: 24,
     cambio: "+2 esta semana",
     icono: Users,
     colorIcono: "text-primary",
@@ -27,7 +29,7 @@ const metricas = [
   },
   {
     titulo: "Turnos Programados",
-    valor: "156",
+    valor: 156,
     cambio: "Para esta semana",
     icono: Calendar,
     colorIcono: "text-chart-2",
@@ -35,7 +37,8 @@ const metricas = [
   },
   {
     titulo: "Tareas Completadas",
-    valor: "89%",
+    valor: 89,
+    esPorcentaje: true,
     cambio: "+5% vs mes anterior",
     icono: CheckCircle,
     colorIcono: "text-chart-1",
@@ -43,7 +46,7 @@ const metricas = [
   },
   {
     titulo: "Pendientes Urgentes",
-    valor: "3",
+    valor: 3,
     cambio: "Requieren atención",
     icono: AlertTriangle,
     colorIcono: "text-destructive",
@@ -81,9 +84,9 @@ const actividadReciente = [
 
 const ResumenGeneral = () => {
   return (
-    <div className="space-y-6">
-      {/* Mensaje de bienvenida */}
-      <div>
+    <div className="space-y-6 animate-fade-in">
+      {/* Mensaje de bienvenida con animación de entrada */}
+      <div className="animate-fade-in" style={{ animationDelay: "0ms" }}>
         <h2 className="text-2xl font-bold text-foreground">
           ¡Bienvenido al Sistema!
         </h2>
@@ -92,10 +95,14 @@ const ResumenGeneral = () => {
         </p>
       </div>
 
-      {/* Grid de tarjetas de métricas */}
+      {/* Grid de tarjetas de métricas con animaciones escalonadas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metricas.map((metrica) => (
-          <Card key={metrica.titulo} className="border-border shadow-sm hover:shadow-md transition-shadow">
+        {metricas.map((metrica, index) => (
+          <Card 
+            key={metrica.titulo} 
+            className="border-border shadow-sm hover:shadow-md transition-shadow animate-fade-in"
+            style={{ animationDelay: `${(index + 1) * 100}ms` }}
+          >
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
@@ -103,7 +110,11 @@ const ResumenGeneral = () => {
                     {metrica.titulo}
                   </p>
                   <p className="text-2xl font-bold text-foreground">
-                    {metrica.valor}
+                    <ContadorAnimado 
+                      valor={metrica.valor} 
+                      esPorcentaje={metrica.esPorcentaje || false}
+                      duracion={1500 + index * 200}
+                    />
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {metrica.cambio}
@@ -120,8 +131,11 @@ const ResumenGeneral = () => {
 
       {/* Sección de contenido adicional */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Gráfico de rendimiento (placeholder) */}
-        <Card className="lg:col-span-2 border-border shadow-sm">
+        {/* Gráfico de rendimiento */}
+        <Card 
+          className="lg:col-span-2 border-border shadow-sm animate-fade-in"
+          style={{ animationDelay: "500ms" }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <TrendingUp className="h-5 w-5 text-primary" />
@@ -129,15 +143,20 @@ const ResumenGeneral = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Área de gráfico simplificada */}
+            {/* Área de gráfico con barras animadas */}
             <div className="h-64 flex items-end justify-between gap-2 px-4">
               {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((dia, index) => {
                 const alturas = [60, 80, 45, 90, 70, 55, 40];
                 return (
                   <div key={dia} className="flex flex-col items-center gap-2 flex-1">
                     <div
-                      className="w-full bg-primary/80 rounded-t-md hover:bg-primary transition-colors"
-                      style={{ height: `${alturas[index]}%` }}
+                      className="w-full bg-primary/80 rounded-t-md hover:bg-primary transition-all duration-500"
+                      style={{ 
+                        height: `${alturas[index]}%`,
+                        animation: `grow-bar 0.8s ease-out ${index * 100}ms forwards`,
+                        transform: "scaleY(0)",
+                        transformOrigin: "bottom"
+                      }}
                     />
                     <span className="text-xs text-muted-foreground">{dia}</span>
                   </div>
@@ -148,7 +167,10 @@ const ResumenGeneral = () => {
         </Card>
 
         {/* Lista de actividad reciente */}
-        <Card className="border-border shadow-sm">
+        <Card 
+          className="border-border shadow-sm animate-fade-in"
+          style={{ animationDelay: "600ms" }}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <Clock className="h-5 w-5 text-primary" />
@@ -160,7 +182,8 @@ const ResumenGeneral = () => {
               {actividadReciente.map((actividad, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors animate-fade-in"
+                  style={{ animationDelay: `${700 + index * 100}ms` }}
                 >
                   <div className="p-2 rounded-full bg-primary/10">
                     <actividad.icono className="h-4 w-4 text-primary" />
@@ -182,6 +205,18 @@ const ResumenGeneral = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Estilos CSS para la animación de las barras del gráfico */}
+      <style>{`
+        @keyframes grow-bar {
+          from {
+            transform: scaleY(0);
+          }
+          to {
+            transform: scaleY(1);
+          }
+        }
+      `}</style>
     </div>
   );
 };

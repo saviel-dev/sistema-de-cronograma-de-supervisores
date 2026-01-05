@@ -3,6 +3,7 @@
  * 
  * Página para gestionar la lista de supervisores del sistema.
  * Muestra una tabla con información de cada supervisor.
+ * Incluye animaciones de entrada y conteo en las estadísticas.
  */
 
 import { Plus, Search, MoreHorizontal, Mail, Phone, Edit, Trash2 } from "lucide-react";
@@ -15,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ContadorAnimado from "@/components/ui/ContadorAnimado";
 
 // Datos de demostración de supervisores
 const supervisores = [
@@ -83,9 +85,12 @@ const variantesEstado: Record<string, "default" | "secondary" | "destructive" | 
 
 const Supervisores = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Encabezado con controles */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div 
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in"
+        style={{ animationDelay: "0ms" }}
+      >
         <div>
           <h2 className="text-2xl font-bold text-foreground">
             Gestión de Supervisores
@@ -102,7 +107,10 @@ const Supervisores = () => {
       </div>
 
       {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div 
+        className="flex flex-col sm:flex-row gap-3 animate-fade-in"
+        style={{ animationDelay: "100ms" }}
+      >
         <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border">
           <Search className="h-4 w-4 text-muted-foreground" />
           <input
@@ -126,38 +134,62 @@ const Supervisores = () => {
         </select>
       </div>
 
-      {/* Estadísticas rápidas */}
+      {/* Estadísticas rápidas con contadores animados */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Card className="border-border shadow-sm">
+        <Card 
+          className="border-border shadow-sm animate-fade-in"
+          style={{ animationDelay: "150ms" }}
+        >
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">6</p>
+            <p className="text-2xl font-bold text-foreground">
+              <ContadorAnimado valor={6} duracion={1200} />
+            </p>
             <p className="text-sm text-muted-foreground">Total Supervisores</p>
           </CardContent>
         </Card>
-        <Card className="border-border shadow-sm">
+        <Card 
+          className="border-border shadow-sm animate-fade-in"
+          style={{ animationDelay: "200ms" }}
+        >
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">4</p>
+            <p className="text-2xl font-bold text-primary">
+              <ContadorAnimado valor={4} duracion={1400} />
+            </p>
             <p className="text-sm text-muted-foreground">Activos</p>
           </CardContent>
         </Card>
-        <Card className="border-border shadow-sm">
+        <Card 
+          className="border-border shadow-sm animate-fade-in"
+          style={{ animationDelay: "250ms" }}
+        >
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-chart-2">1</p>
+            <p className="text-2xl font-bold text-chart-2">
+              <ContadorAnimado valor={1} duracion={1000} />
+            </p>
             <p className="text-sm text-muted-foreground">En Vacaciones</p>
           </CardContent>
         </Card>
-        <Card className="border-border shadow-sm">
+        <Card 
+          className="border-border shadow-sm animate-fade-in"
+          style={{ animationDelay: "300ms" }}
+        >
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-muted">1</p>
+            <p className="text-2xl font-bold text-muted">
+              <ContadorAnimado valor={1} duracion={1000} />
+            </p>
             <p className="text-sm text-muted-foreground">Inactivos</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Lista de supervisores en cards (responsivo) */}
+      {/* Lista de supervisores en cards con animaciones escalonadas */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {supervisores.map((supervisor) => (
-          <Card key={supervisor.id} className="border-border shadow-sm hover:shadow-md transition-shadow">
+        {supervisores.map((supervisor, index) => (
+          <Card 
+            key={supervisor.id} 
+            className="border-border shadow-sm hover:shadow-md transition-shadow animate-fade-in"
+            style={{ animationDelay: `${400 + index * 100}ms` }}
+          >
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
