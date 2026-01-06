@@ -10,7 +10,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+ import { AuthProvider } from "@/contexts/AuthContext";
+ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Layout principal
 import LayoutPrincipal from "./components/layout/LayoutPrincipal";
@@ -24,9 +26,18 @@ import GeneradorCronograma from "./pages/GeneradorCronograma";
 import Configuracion from "./pages/Configuracion";
 import Ayuda from "./pages/Ayuda";
 import NotFound from "./pages/NotFound";
+ import Login from "./pages/Login";
 
 // Cliente de React Query para manejo de estado del servidor
 const queryClient = new QueryClient();
+
+const ProtectedLayout = () => (
+  <ProtectedRoute>
+    <LayoutPrincipal>
+      <Outlet />
+    </LayoutPrincipal>
+  </ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -35,35 +46,38 @@ const App = () => (
       <Toaster />
       <Sonner />
 
-      <BrowserRouter>
-        {/* Layout con sidebar que envuelve todas las rutas */}
-        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-          <LayoutPrincipal>
+      <AuthProvider>
+        <BrowserRouter>
+          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
             <Routes>
-              {/* Página principal - Resumen general */}
-              <Route path="/" element={<ResumenGeneral />} />
+              <Route path="/login" element={<Login />} />
 
-              {/* Cronograma de supervisores */}
-              <Route path="/cronograma" element={<Cronograma />} />
+              <Route element={<ProtectedLayout />}>
+                {/* Página principal - Resumen general */}
+                <Route path="/" element={<ResumenGeneral />} />
 
-              {/* Gestión de supervisores */}
-              <Route path="/supervisores" element={<Supervisores />} />
+                {/* Cronograma de supervisores */}
+                <Route path="/cronograma" element={<Cronograma />} />
 
-              {/* Generador automático de cronogramas */}
-              <Route path="/generador" element={<GeneradorCronograma />} />
+                {/* Gestión de supervisores */}
+                <Route path="/supervisores" element={<Supervisores />} />
 
-              {/* Configuración del sistema */}
-              <Route path="/configuracion" element={<Configuracion />} />
+                {/* Generador automático de cronogramas */}
+                <Route path="/generador" element={<GeneradorCronograma />} />
 
-              {/* Centro de ayuda */}
-              <Route path="/ayuda" element={<Ayuda />} />
+                {/* Configuración del sistema */}
+                <Route path="/configuracion" element={<Configuracion />} />
 
-              {/* Ruta 404 para páginas no encontradas */}
-              <Route path="*" element={<NotFound />} />
+                {/* Centro de ayuda */}
+                <Route path="/ayuda" element={<Ayuda />} />
+
+                {/* Ruta 404 para páginas no encontradas */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
-          </LayoutPrincipal>
-        </ThemeProvider>
-      </BrowserRouter>
+          </ThemeProvider>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -6,12 +6,13 @@
  * título de la sección actual y controles de usuario.
  */
 
-import { Menu, Bell, User, Search, X, CheckCircle, Clock, Calendar, AlertTriangle } from "lucide-react";
+import { Menu, Bell, User, Search, X, CheckCircle, Clock, Calendar, AlertTriangle, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSupervisores, useTurnos } from "@/hooks/useData";
 import { StorageService } from "@/services/storage.service";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PropiedadesEncabezado {
   estaColapsada: boolean;
@@ -28,11 +29,15 @@ const Encabezado = ({
   const [resultados, setResultados] = useState<any[]>([]);
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false);
+  const [mostrarMenuUsuario, setMostrarMenuUsuario] = useState(false);
   const [actividadReciente, setActividadReciente] = useState<any[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const notificacionesRef = useRef<HTMLDivElement>(null);
+  const menuUsuarioRef = useRef<HTMLDivElement>(null);
   const { supervisores } = useSupervisores();
   const { turnos } = useTurnos();
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
 
   // Cargar actividad reciente
   useEffect(() => {
@@ -54,12 +59,20 @@ const Encabezado = ({
       if (notificacionesRef.current && !notificacionesRef.current.contains(event.target as Node)) {
         setMostrarNotificaciones(false);
       }
+      if (menuUsuarioRef.current && !menuUsuarioRef.current.contains(event.target as Node)) {
+        setMostrarMenuUsuario(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [wrapperRef, notificacionesRef]);
+  }, [wrapperRef, notificacionesRef, menuUsuarioRef]);
+
+  const manejarLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   const manejarBusqueda = (e: React.ChangeEvent<HTMLInputElement>) => {
     const valor = e.target.value;
@@ -154,7 +167,7 @@ const Encabezado = ({
                 className="bg-transparent border-none outline-none text-sm w-40 lg:w-56 text-foreground placeholder:text-muted-foreground"
               />
               {consulta && (
-                <button onClick={limpiarBusqueda}>
+                <button onClick={limpiarBusqueda} aria-label="Limpiar búsqueda">
                   <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                 </button>
               )}
@@ -196,6 +209,7 @@ const Encabezado = ({
             <button
               onClick={() => setMostrarNotificaciones(!mostrarNotificaciones)}
               className="p-2 rounded-lg hover:bg-accent transition-colors relative"
+              aria-label="Notificaciones"
             >
               <Bell className="h-5 w-5 text-muted-foreground" />
               {/* Indicador de notificaciones pendientes */}
@@ -266,12 +280,37 @@ const Encabezado = ({
             )}
           </div>
 
-          {/* Avatar de usuario */}
-          <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-accent transition-colors">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-              <User className="h-4 w-4 text-primary-foreground" />
-            </div>
-          </button>
+          {/* Avatar de usuario + menú */}
+          <div className="relative" ref={menuUsuarioRef}>
+            <button
+              onClick={() => setMostrarMenuUsuario(!mostrarMenuUsuario)}
+              className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105 group"
+              aria-label="Menú de usuario"
+            >
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center transition-all duration-200 group-hover:bg-red-500">
+                <User className="h-4 w-4 text-primary-foreground" />
+              </div>
+            </button>
+
+            {mostrarMenuUsuario && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-background border border-border rounded-lg shadow-lg z-50 animate-fade-in overflow-hidden">
+                <div className="p-3 border-b border-border">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {user ?? "Usuario"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Sesión activa</p>
+                </div>
+
+                <button
+                  onClick={manejarLogout}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                >
+                  <LogOut className="h-4 w-4 text-red-500" />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
