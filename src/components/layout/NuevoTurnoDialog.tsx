@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useTurnos, useSupervisores } from "@/hooks/useData";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -21,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface NuevoTurnoDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    turnoEditar?: any; // Si existe, es modo edición
 }
 
 const actividadesMineras = [
@@ -32,23 +35,72 @@ const actividadesMineras = [
     "Turno Normal",
 ];
 
-const supervisores = [
-    "Carlos Mendoza",
-    "Ana García",
-    "Roberto Silva",
-    "María López",
-    "Juan Pérez",
-    "Laura Torres",
-];
+// Eliminado array estatico de supervisores
+// const supervisores = [...];
 
-export function NuevoTurnoDialog({ open, onOpenChange }: NuevoTurnoDialogProps) {
+export function NuevoTurnoDialog({ open, onOpenChange, turnoEditar }: NuevoTurnoDialogProps) {
+    const { addTurno, updateTurno } = useTurnos();
+    const { supervisores } = useSupervisores();
+
+    const [formData, setFormData] = useState({
+        supervisor: "",
+        dia: "",
+        actividad: "",
+        horario: "",
+        notas: ""
+    });
+
+    // Cargar datos si estamos en modo edición
+    useEffect(() => {
+        if (turnoEditar) {
+            // Mapeamos los datos del turno al formulario
+            const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+            setFormData({
+                supervisor: turnoEditar.supervisor || "",
+                dia: dias[turnoEditar.dia], // Convertir indice a nombre string
+                actividad: turnoEditar.tipo || "", // Usamos 'tipo' como actividad por compatibilidad
+                horario: turnoEditar.horario || "",
+                notas: turnoEditar.notas || ""
+            });
+        } else {
+            // Resetear formulario
+            setFormData({
+                supervisor: "",
+                dia: "",
+                actividad: "",
+                horario: "",
+                notas: ""
+            });
+        }
+    }, [turnoEditar, open]);
+
+    const handleSave = () => {
+        const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        const indiceDia = dias.indexOf(formData.dia);
+
+        const turnoData = {
+            supervisor: formData.supervisor,
+            dia: indiceDia,
+            tipo: formData.actividad,
+            horario: formData.horario,
+            notas: formData.notas
+        };
+
+        if (turnoEditar) {
+            updateTurno(turnoEditar.id, turnoData);
+        } else {
+            addTurno(turnoData);
+        }
+        onOpenChange(false);
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Nuevo Turno / Actividad</DialogTitle>
+                    <DialogTitle>{turnoEditar ? "Editar Turno" : "Nuevo Turno / Actividad"}</DialogTitle>
                     <DialogDescription>
-                        Agrega un nuevo turno o actividad al cronograma del supervisor.
+                        {turnoEditar ? "Modifica los detalles del turno." : "Agrega un nuevo turno o actividad al cronograma del supervisor."}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -56,14 +108,17 @@ export function NuevoTurnoDialog({ open, onOpenChange }: NuevoTurnoDialogProps) 
                         <Label htmlFor="supervisor" className="text-right">
                             Supervisor
                         </Label>
-                        <Select>
+                        <Select
+                            value={formData.supervisor}
+                            onValueChange={(v) => setFormData({ ...formData, supervisor: v })}
+                        >
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Seleccionar supervisor" />
                             </SelectTrigger>
                             <SelectContent>
                                 {supervisores.map((sup) => (
-                                    <SelectItem key={sup} value={sup}>
-                                        {sup}
+                                    <SelectItem key={sup.id} value={sup.nombre}>
+                                        {sup.nombre}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -73,7 +128,10 @@ export function NuevoTurnoDialog({ open, onOpenChange }: NuevoTurnoDialogProps) 
                         <Label htmlFor="dia" className="text-right">
                             Día
                         </Label>
-                        <Select>
+                        <Select
+                            value={formData.dia}
+                            onValueChange={(v) => setFormData({ ...formData, dia: v })}
+                        >
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Seleccionar día" />
                             </SelectTrigger>
@@ -92,7 +150,10 @@ export function NuevoTurnoDialog({ open, onOpenChange }: NuevoTurnoDialogProps) 
                         <Label htmlFor="actividad" className="text-right">
                             Actividad
                         </Label>
-                        <Select>
+                        <Select
+                            value={formData.actividad}
+                            onValueChange={(v) => setFormData({ ...formData, actividad: v })}
+                        >
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Tipo de actividad" />
                             </SelectTrigger>
@@ -113,6 +174,8 @@ export function NuevoTurnoDialog({ open, onOpenChange }: NuevoTurnoDialogProps) 
                             id="horario"
                             placeholder="Ej: 08:00 - 20:00"
                             className="col-span-3"
+                            value={formData.horario}
+                            onChange={(e) => setFormData({ ...formData, horario: e.target.value })}
                         />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -123,12 +186,14 @@ export function NuevoTurnoDialog({ open, onOpenChange }: NuevoTurnoDialogProps) 
                             id="notas"
                             placeholder="Detalles adicionales..."
                             className="col-span-3"
+                            value={formData.notas}
+                            onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
                         />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type="submit" onClick={() => onOpenChange(false)}>
-                        Guardar Turno
+                    <Button type="submit" onClick={handleSave}>
+                        {turnoEditar ? "Guardar Cambios" : "Guardar Turno"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

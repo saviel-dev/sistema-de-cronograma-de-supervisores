@@ -20,6 +20,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import ResumenGeneral from "./pages/ResumenGeneral";
 import Cronograma from "./pages/Cronograma";
 import Supervisores from "./pages/Supervisores";
+import GeneradorCronograma from "./pages/GeneradorCronograma";
 import Configuracion from "./pages/Configuracion";
 import Ayuda from "./pages/Ayuda";
 import NotFound from "./pages/NotFound";
@@ -47,6 +48,9 @@ const App = () => (
 
               {/* Gestión de supervisores */}
               <Route path="/supervisores" element={<Supervisores />} />
+
+              {/* Generador automático de cronogramas */}
+              <Route path="/generador" element={<GeneradorCronograma />} />
 
               {/* Configuración del sistema */}
               <Route path="/configuracion" element={<Configuracion />} />

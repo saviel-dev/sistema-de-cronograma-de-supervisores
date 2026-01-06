@@ -14,7 +14,8 @@ import {
   HelpCircle,
   Users,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ui/mode-toggle";
@@ -35,6 +36,11 @@ const elementosNavegacion = [
     titulo: "Supervisores",
     ruta: "/supervisores",
     icono: Users,
+  },
+  {
+    titulo: "Generador Auto",
+    ruta: "/generador",
+    icono: Sparkles,
   },
   {
     titulo: "Configuración",

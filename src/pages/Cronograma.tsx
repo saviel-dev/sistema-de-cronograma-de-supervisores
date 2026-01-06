@@ -6,33 +6,27 @@
  * Incluye animaciones de entrada y conteo animado en las cifras.
  */
 
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import ContadorAnimado from "@/components/ui/ContadorAnimado";
+
 import { NuevoTurnoDialog } from "@/components/layout/NuevoTurnoDialog";
+import { useTurnos } from "@/hooks/useData";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Días de la semana para el encabezado del calendario
 const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-// Datos de demostración para los turnos programados
-const turnosDemostracion = [
-  { dia: 0, supervisor: "Carlos M.", horario: "06:00 - 14:00", tipo: "mañana" },
-  { dia: 0, supervisor: "Ana G.", horario: "14:00 - 22:00", tipo: "tarde" },
-  { dia: 1, supervisor: "Roberto S.", horario: "06:00 - 14:00", tipo: "mañana" },
-  { dia: 1, supervisor: "María L.", horario: "14:00 - 22:00", tipo: "tarde" },
-  { dia: 1, supervisor: "Juan P.", horario: "22:00 - 06:00", tipo: "noche" },
-  { dia: 2, supervisor: "Laura T.", horario: "06:00 - 14:00", tipo: "mañana" },
-  { dia: 2, supervisor: "Carlos M.", horario: "14:00 - 22:00", tipo: "tarde" },
-  { dia: 3, supervisor: "Ana G.", horario: "06:00 - 14:00", tipo: "mañana" },
-  { dia: 3, supervisor: "Roberto S.", horario: "14:00 - 22:00", tipo: "tarde" },
-  { dia: 4, supervisor: "María L.", horario: "06:00 - 14:00", tipo: "mañana" },
-  { dia: 4, supervisor: "Juan P.", horario: "14:00 - 22:00", tipo: "tarde" },
-  { dia: 4, supervisor: "Laura T.", horario: "22:00 - 06:00", tipo: "noche" },
-  { dia: 5, supervisor: "Carlos M.", horario: "08:00 - 16:00", tipo: "mañana" },
-  { dia: 6, supervisor: "Ana G.", horario: "08:00 - 16:00", tipo: "mañana" },
-];
+// Eliminada importación estática
+// import { turnosDemostracion } from "@/data/mockData";
 
 // Colores según el tipo de turno
 const coloresTurno: Record<string, string> = {
@@ -44,10 +38,22 @@ const coloresTurno: Record<string, string> = {
 const Cronograma = () => {
   const [semanaActual, setSemanaActual] = useState(0);
   const [isNuevoTurnoOpen, setIsNuevoTurnoOpen] = useState(false);
+  const [turnoAEditar, setTurnoAEditar] = useState<any>(null);
+  const { turnos, deleteTurno } = useTurnos();
+
+  const handleEditarTurno = (turno: any) => {
+    setTurnoAEditar(turno);
+    setIsNuevoTurnoOpen(true);
+  };
+
+  const handleNuevoTurno = () => {
+    setTurnoAEditar(null);
+    setIsNuevoTurnoOpen(true);
+  };
 
   // Obtener los turnos para un día específico
   const obtenerTurnosPorDia = (indiceDia: number) => {
-    return turnosDemostracion.filter((turno) => turno.dia === indiceDia);
+    return turnos.filter((turno) => turno.dia === indiceDia);
   };
 
   return (
@@ -91,7 +97,7 @@ const Cronograma = () => {
           </div>
 
           {/* Botón para agregar nuevo turno */}
-          <Button className="gap-2" onClick={() => setIsNuevoTurnoOpen(true)}>
+          <Button className="gap-2" onClick={handleNuevoTurno}>
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Nuevo Turno</span>
           </Button>
@@ -99,6 +105,7 @@ const Cronograma = () => {
           <NuevoTurnoDialog
             open={isNuevoTurnoOpen}
             onOpenChange={setIsNuevoTurnoOpen}
+            turnoEditar={turnoAEditar}
           />
         </div>
       </div>
@@ -115,7 +122,7 @@ const Cronograma = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center p-4 rounded-md border border-border/40">
               <p className="text-2xl font-bold text-foreground">
-                <ContadorAnimado valor={14} duracion={1500} />
+                <ContadorAnimado valor={turnos.length} duracion={1500} />
               </p>
               <p className="text-sm text-muted-foreground">Turnos Totales</p>
             </div>
@@ -182,11 +189,35 @@ const Cronograma = () => {
                   turnosDelDia.map((turno, idx) => (
                     <div
                       key={idx}
-                      className={`p-2 rounded-sm ${coloresTurno[turno.tipo]} animate-fade-in`}
+                      className={`p-2 rounded-sm ${coloresTurno[turno.tipo]} animate-fade-in group relative pr-6`}
                       style={{ animationDelay: `${400 + indice * 80 + idx * 50}ms` }}
                     >
                       <p className="text-sm font-medium">{turno.supervisor}</p>
                       <p className="text-xs opacity-80">{turno.horario}</p>
+
+                      {/* Menú de acciones pequeño */}
+                      <div className="absolute top-1 right-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="h-6 w-6 flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                              <MoreVertical className="h-3 w-3" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-32">
+                            <DropdownMenuItem onClick={() => handleEditarTurno(turno)}>
+                              <Edit2 className="mr-2 h-3.5 w-3.5" />
+                              <span>Editar</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => deleteTurno(turno.id)}
+                            >
+                              <Trash2 className="mr-2 h-3.5 w-3.5" />
+                              <span>Eliminar</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   ))
                 ) : (

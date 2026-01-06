@@ -6,8 +6,11 @@
  * Incluye animaciones de entrada y conteo en las estadísticas.
  */
 
-import { Plus, Search, MoreHorizontal, Mail, Phone, Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Plus, Search, MoreHorizontal, Mail, Phone, Edit, Trash2, AlertTriangle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NuevoSupervisorDialog } from "@/components/layout/NuevoSupervisorDialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,64 +20,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ContadorAnimado from "@/components/ui/ContadorAnimado";
+import { useSupervisores } from "@/hooks/useData";
 
-// Datos de demostración de supervisores
-const supervisores = [
-  {
-    id: 1,
-    nombre: "Carlos Mendoza",
-    correo: "carlos.mendoza@empresa.com",
-    telefono: "+51 999 888 777",
-    departamento: "Producción",
-    estado: "activo",
-    turnosAsignados: 8,
-  },
-  {
-    id: 2,
-    nombre: "Ana García",
-    correo: "ana.garcia@empresa.com",
-    telefono: "+51 999 777 666",
-    departamento: "Calidad",
-    estado: "activo",
-    turnosAsignados: 6,
-  },
-  {
-    id: 3,
-    nombre: "Roberto Silva",
-    correo: "roberto.silva@empresa.com",
-    telefono: "+51 999 666 555",
-    departamento: "Logística",
-    estado: "activo",
-    turnosAsignados: 7,
-  },
-  {
-    id: 4,
-    nombre: "María López",
-    correo: "maria.lopez@empresa.com",
-    telefono: "+51 999 555 444",
-    departamento: "Producción",
-    estado: "vacaciones",
-    turnosAsignados: 0,
-  },
-  {
-    id: 5,
-    nombre: "Juan Pérez",
-    correo: "juan.perez@empresa.com",
-    telefono: "+51 999 444 333",
-    departamento: "Mantenimiento",
-    estado: "activo",
-    turnosAsignados: 5,
-  },
-  {
-    id: 6,
-    nombre: "Laura Torres",
-    correo: "laura.torres@empresa.com",
-    telefono: "+51 999 333 222",
-    departamento: "Calidad",
-    estado: "inactivo",
-    turnosAsignados: 0,
-  },
-];
+// Eliminada la importación estática
+// import { supervisores } from "@/data/mockData";
 
 // Mapeo de estados a variantes de badge
 const variantesEstado: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -83,7 +32,34 @@ const variantesEstado: Record<string, "default" | "secondary" | "destructive" | 
   inactivo: "outline",
 };
 
+
+
 const Supervisores = () => {
+  const { supervisores, deleteSupervisor } = useSupervisores();
+  const [isNuevoSupervisorOpen, setIsNuevoSupervisorOpen] = useState(false);
+  const [supervisorEditar, setSupervisorEditar] = useState<any>(null);
+
+  // Lógica de Validación: Exactamente 2 supervisores en "Perforación"
+  const supervisoresPerforando = supervisores.filter(s => s.estadoCiclo === "Perforación");
+  const numPerforando = supervisoresPerforando.length;
+  const esValido = numPerforando === 2;
+
+  const handleEditar = (supervisor: any) => {
+    setSupervisorEditar(supervisor);
+    setIsNuevoSupervisorOpen(true);
+  };
+
+  const handleNuevo = () => {
+    setSupervisorEditar(null);
+    setIsNuevoSupervisorOpen(true);
+  };
+
+  const contadores = {
+    total: supervisores.length,
+    perforacion: numPerforando,
+    descanso: supervisores.filter(s => s.estadoCiclo === 'Descanso').length,
+    otros: supervisores.length - numPerforando - (supervisores.filter(s => s.estadoCiclo === 'Descanso').length)
+  };
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Encabezado con controles */}
@@ -100,11 +76,39 @@ const Supervisores = () => {
           </p>
         </div>
 
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleNuevo}>
           <Plus className="h-4 w-4" />
           <span>Agregar Supervisor</span>
         </Button>
+
+        <NuevoSupervisorDialog
+          open={isNuevoSupervisorOpen}
+          onOpenChange={setIsNuevoSupervisorOpen}
+          supervisorEditar={supervisorEditar}
+        />
       </div>
+
+      {/* Alerta de Validación de Reglas de Negocio */}
+      {!esValido && (
+        <Alert variant="destructive" className="animate-fade-in border-destructive/50 bg-destructive/10">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Configuración Inválida de Perforación</AlertTitle>
+          <AlertDescription>
+            Se requiere <strong>exactamente 2 supervisores</strong> en estado "Perforación".
+            Actualmente hay <strong>{numPerforando}</strong>.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {esValido && (
+        <Alert className="animate-fade-in border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400">
+          <CheckCircle className="h-4 w-4 stroke-green-600 dark:stroke-green-400" />
+          <AlertTitle>Configuración Óptima</AlertTitle>
+          <AlertDescription>
+            El ciclo de perforación cumple con la regla de 2 supervisores activos.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Barra de búsqueda y filtros */}
       <div
@@ -126,11 +130,10 @@ const Supervisores = () => {
           <option value="inactivo">Inactivo</option>
         </select>
         <select className="px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm">
-          <option value="">Todos los departamentos</option>
-          <option value="produccion">Producción</option>
-          <option value="calidad">Calidad</option>
-          <option value="logistica">Logística</option>
-          <option value="mantenimiento">Mantenimiento</option>
+          <option value="">Todos los ciclos</option>
+          <option value="Perforación">Perforación</option>
+          <option value="Descanso">Descanso</option>
+          <option value="Subida">Subida</option>
         </select>
       </div>
 
@@ -142,42 +145,33 @@ const Supervisores = () => {
         >
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-foreground">
-              <ContadorAnimado valor={6} duracion={1200} />
+              <ContadorAnimado valor={contadores.total} duracion={1200} />
             </p>
             <p className="text-sm text-muted-foreground">Total Supervisores</p>
           </CardContent>
         </Card>
-        <Card
-          className="border-border shadow-sm animate-fade-in"
-          style={{ animationDelay: "200ms" }}
-        >
+        <Card className="border-border shadow-sm animate-fade-in" style={{ animationDelay: "150ms" }}>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">
-              <ContadorAnimado valor={4} duracion={1400} />
+              <ContadorAnimado valor={contadores.perforacion} duracion={1400} />
             </p>
-            <p className="text-sm text-muted-foreground">Activos</p>
+            <p className="text-sm text-muted-foreground">Perforando</p>
           </CardContent>
         </Card>
-        <Card
-          className="border-border shadow-sm animate-fade-in"
-          style={{ animationDelay: "250ms" }}
-        >
+        <Card className="border-border shadow-sm animate-fade-in" style={{ animationDelay: "200ms" }}>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-chart-2">
-              <ContadorAnimado valor={1} duracion={1000} />
+              <ContadorAnimado valor={contadores.descanso} duracion={1000} />
             </p>
-            <p className="text-sm text-muted-foreground">En Vacaciones</p>
+            <p className="text-sm text-muted-foreground">Descanso</p>
           </CardContent>
         </Card>
-        <Card
-          className="border-border shadow-sm animate-fade-in"
-          style={{ animationDelay: "300ms" }}
-        >
+        <Card className="border-border shadow-sm animate-fade-in" style={{ animationDelay: "250ms" }}>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-muted">
-              <ContadorAnimado valor={1} duracion={1000} />
+            <p className="text-2xl font-bold text-muted-foreground">
+              <ContadorAnimado valor={contadores.otros} duracion={1000} />
             </p>
-            <p className="text-sm text-muted-foreground">Inactivos</p>
+            <p className="text-sm text-muted-foreground">Otros Ciclos</p>
           </CardContent>
         </Card>
       </div>
@@ -202,7 +196,7 @@ const Supervisores = () => {
                       {supervisor.nombre}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      {supervisor.departamento}
+                      ID: {supervisor.identificacion || "S/N"}
                     </p>
                   </div>
                 </div>
@@ -215,11 +209,14 @@ const Supervisores = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem className="gap-2">
+                    <DropdownMenuItem className="gap-2" onClick={() => handleEditar(supervisor)}>
                       <Edit className="h-4 w-4" />
                       Editar
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2 text-destructive">
+                    <DropdownMenuItem
+                      className="gap-2 text-destructive"
+                      onClick={() => deleteSupervisor(supervisor.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                       Eliminar
                     </DropdownMenuItem>
@@ -241,13 +238,21 @@ const Supervisores = () => {
               </div>
 
               {/* Estado y turnos */}
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <Badge variant={variantesEstado[supervisor.estado]}>
-                  {supervisor.estado.charAt(0).toUpperCase() + supervisor.estado.slice(1)}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {supervisor.turnosAsignados} turnos asignados
-                </span>
+              {/* Estado y turnos reemplazados por Ciclo y Régimen */}
+              <div className="flex items-center justify-between pt-3 border-t border-border mt-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-muted-foreground font-bold tracking-wider uppercase">Ciclo Actual</span>
+                  <Badge
+                    variant={supervisor.estadoCiclo === 'Perforación' ? 'default' : 'outline'}
+                    className={`${supervisor.estadoCiclo === 'Perforación' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
+                  >
+                    {supervisor.estadoCiclo || "Desconocido"}
+                  </Badge>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-[10px] text-muted-foreground font-bold tracking-wider uppercase">Régimen</span>
+                  <span className="text-sm font-bold bg-muted px-2 py-0.5 rounded-md">{supervisor.regimen || "14x7"}</span>
+                </div>
               </div>
             </CardContent>
           </Card>

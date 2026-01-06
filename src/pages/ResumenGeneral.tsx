@@ -6,6 +6,7 @@
  * Incluye animaciones de entrada y conteo en las cifras.
  */
 
+import { useState, useEffect } from "react";
 import {
   Users,
   Calendar,
@@ -16,77 +17,104 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ContadorAnimado from "@/components/ui/ContadorAnimado";
+import { useSupervisores, useTurnos } from "@/hooks/useData";
+import { StorageService } from "@/services/storage.service";
 
-// Datos de demostración para las tarjetas de métricas
-const metricas = [
-  {
-    titulo: "Supervisores Activos",
-    valor: 24,
-    cambio: "+2 esta semana",
-    icono: Users,
-    colorIcono: "text-white",
-    fondoIcono: "bg-white/20",
-    bgColor: "bg-blue-600",
-  },
-  {
-    titulo: "Turnos Programados",
-    valor: 156,
-    cambio: "Para esta semana",
-    icono: Calendar,
-    colorIcono: "text-white",
-    fondoIcono: "bg-white/20",
-    bgColor: "bg-violet-600",
-  },
-  {
-    titulo: "Tareas Completadas",
-    valor: 89,
-    esPorcentaje: true,
-    cambio: "+5% vs mes anterior",
-    icono: CheckCircle,
-    colorIcono: "text-white",
-    fondoIcono: "bg-white/20",
-    bgColor: "bg-emerald-600",
-  },
-  {
-    titulo: "Pendientes Urgentes",
-    valor: 3,
-    cambio: "Requieren atención",
-    icono: AlertTriangle,
-    colorIcono: "text-white",
-    fondoIcono: "bg-white/20",
-    bgColor: "bg-rose-600",
-  },
-];
+// Eliminado array estático de metricas
+// const metricas = [...];
 
-// Actividad reciente para mostrar en la lista
-const actividadReciente = [
-  {
-    usuario: "Carlos Mendoza",
-    accion: "completó turno de supervisión",
-    tiempo: "Hace 30 min",
-    icono: CheckCircle,
-  },
-  {
-    usuario: "Ana García",
-    accion: "actualizó su disponibilidad",
-    tiempo: "Hace 1 hora",
-    icono: Clock,
-  },
-  {
-    usuario: "Roberto Silva",
-    accion: "solicitó cambio de turno",
-    tiempo: "Hace 2 horas",
-    icono: Calendar,
-  },
-  {
-    usuario: "María López",
-    accion: "reportó incidencia",
-    tiempo: "Hace 3 horas",
-    icono: AlertTriangle,
-  },
-];
+// Eliminado array estático de actividades
+// const actividadReciente = [...];
 
 const ResumenGeneral = () => {
+  const { supervisores } = useSupervisores();
+  const { turnos } = useTurnos();
+  const [actividadReciente, setActividadReciente] = useState<any[]>([]);
+
+  // Cargar actividad reciente
+  useEffect(() => {
+    const loadActivity = () => {
+      const log = StorageService.getActivityLog();
+      // Mapear a formato de UI con iconos
+      const formattedLog = log.map((item: any) => {
+        let icono = CheckCircle;
+        if (item.accion.includes("eliminó")) icono = AlertTriangle;
+        if (item.accion.includes("editó")) icono = Clock;
+        if (item.accion.includes("creó")) icono = Calendar;
+
+        // Calcular tiempo relativo
+        const diff = Date.now() - item.timestamp;
+        const minutos = Math.floor(diff / 60000);
+        const horas = Math.floor(minutos / 60);
+        let tiempo = "Hace unos segundos";
+        if (minutos < 60) tiempo = `Hace ${minutos} min`;
+        else if (horas < 24) tiempo = `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
+        else tiempo = `Hace ${Math.floor(horas / 24)} día${Math.floor(horas / 24) > 1 ? 's' : ''}`;
+
+        return {
+          usuario: item.usuario,
+          accion: item.accion,
+          tiempo,
+          icono
+        };
+      });
+      setActividadReciente(formattedLog.slice(0, 5)); // Mostrar solo las últimas 5
+    };
+
+    loadActivity();
+    window.addEventListener("storage-activity-update", loadActivity);
+    return () => window.removeEventListener("storage-activity-update", loadActivity);
+  }, []);
+
+
+  // Calcular distribución de turnos por día
+  const shiftsByDay = [0, 0, 0, 0, 0, 0, 0]; // Lun-Dom
+  turnos.forEach(t => {
+    if (t.dia >= 0 && t.dia <= 6) {
+      shiftsByDay[t.dia]++;
+    }
+  });
+  const maxShifts = Math.max(...shiftsByDay, 1); // Evitar división por 0
+
+  const metricas = [
+    {
+      titulo: "Supervisores Activos",
+      valor: supervisores.filter(s => s.estado === 'activo').length,
+      cambio: "Total registrados: " + supervisores.length,
+      icono: Users,
+      colorIcono: "text-white",
+      fondoIcono: "bg-white/20",
+      bgColor: "bg-blue-600",
+    },
+    {
+      titulo: "Turnos Programados",
+      valor: turnos.length,
+      cambio: "Para esta semana",
+      icono: Calendar,
+      colorIcono: "text-white",
+      fondoIcono: "bg-white/20",
+      bgColor: "bg-violet-600",
+    },
+    {
+      titulo: "Tareas Completadas",
+      valor: 89, // Mantener estático por ahora
+      esPorcentaje: true,
+      cambio: "+5% vs mes anterior",
+      icono: CheckCircle,
+      colorIcono: "text-white",
+      fondoIcono: "bg-white/20",
+      bgColor: "bg-emerald-600",
+    },
+    {
+      titulo: "Pendientes Urgentes",
+      valor: 3, // Mantener estático por ahora
+      cambio: "Requieren atención",
+      icono: AlertTriangle,
+      colorIcono: "text-white",
+      fondoIcono: "bg-white/20",
+      bgColor: "bg-rose-600",
+    },
+  ];
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Mensaje de bienvenida con animación de entrada */}
@@ -150,18 +178,25 @@ const ResumenGeneral = () => {
             {/* Área de gráfico con barras animadas */}
             <div className="h-64 flex items-end justify-between gap-2 px-4">
               {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((dia, index) => {
-                const alturas = [60, 80, 45, 90, 70, 55, 40];
+                const altura = maxShifts > 0 ? (shiftsByDay[index] / maxShifts) * 90 : 0;
                 return (
                   <div key={dia} className="flex flex-col items-center gap-2 flex-1">
                     <div
-                      className="w-full bg-primary/80 rounded-t-md hover:bg-primary transition-all duration-500"
+                      className="w-full bg-primary/80 rounded-t-md hover:bg-primary transition-all duration-500 relative group"
                       style={{
-                        height: `${alturas[index]}%`,
+                        height: `${altura}%`,
+                        minHeight: shiftsByDay[index] > 0 ? "20px" : "0",
                         animation: `grow-bar 0.8s ease-out ${index * 100}ms forwards`,
                         transform: "scaleY(0)",
                         transformOrigin: "bottom"
                       }}
-                    />
+                    >
+                      {shiftsByDay[index] > 0 && (
+                        <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                          {shiftsByDay[index]}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground">{dia}</span>
                   </div>
                 );
